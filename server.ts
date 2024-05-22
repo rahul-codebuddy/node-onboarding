@@ -1,38 +1,38 @@
-import express, { Request, Response, json } from "express";
-const app = express();
+import express from "express";
 import dotenv from "dotenv";
+import routes from "./routes";
+import { MongoMemoryServer } from "mongodb-memory-server"
+import mongoose from "mongoose";
 dotenv.config();
+const app = express();
 
 const PORT = process.env.PORT;
 
 app.use(express.json());
 
-// Routes:
-app.get('/hello', (req: Request, res: Response) => {
-    return res.status(200).send('Hello World');
-});
+// Initializing routes:
+routes(app);
 
-app.get('/hello/:username', (req: Request, res: Response) => {
-    const { username } = req.params;
-    if (!username) return res.status(400).send('Username is required');
+// DB Connection:
+const connect = async () => {
     try {
-        return res.status(200).send(`Hello ${username}`);
-    } catch (err) {
-        return res.status(500).send('Something went wrong');
-    }
-});
+        const mongod = await MongoMemoryServer.create();
+        const URI = await mongod.getUri();
+        // const URI = process.env.MONGO_URI || "mongodb://localhost:27017/";
+        mongoose.connect(URI, {
+            dbName: "node-train"
+        });
 
-app.post('/hello', (req: Request, res: Response) => {
-    const { username } = req.body;
-    if (!username) return res.status(400).send('Username is required');
-    try {
-        return res.status(200).send(`Hello ${username}`);
+        mongoose.connection.once('open', () => {
+            console.log(`MongoDB successfully connected to ${URI}`);
+        });
     } catch (err) {
-        return res.status(500).send('Something went wrong');
+        console.log(`MongoDB connection failed`);
+        throw err;
     }
-});
-
+}
 
 app.listen(PORT, () => {
     console.log(`App is running on port ${PORT}`);
+    connect();
 });
