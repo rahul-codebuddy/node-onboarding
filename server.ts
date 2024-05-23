@@ -1,8 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import routes from "./routes";
-import { MongoMemoryServer } from "mongodb-memory-server"
 import mongoose from "mongoose";
+import redisConnect from "./config/redisConfig";
+import { MongoMemoryServer } from "mongodb-memory-server"
 dotenv.config();
 const app = express();
 
@@ -16,9 +17,9 @@ routes(app);
 // DB Connection:
 const connect = async () => {
     try {
-        const mongod = await MongoMemoryServer.create();
-        const URI = await mongod.getUri();
-        // const URI = process.env.MONGO_URI || "mongodb://localhost:27017/";   // Uncomment when using local-disk mongoDB
+        // const mongod = await MongoMemoryServer.create();
+        // const URI = await mongod.getUri();
+        const URI = process.env.MONGO_URI || "mongodb://localhost:27017/";   // Uncomment when using local-disk mongoDB
         mongoose.connect(URI, {
             dbName: "node-train",
             user: process.env.DB_USER,

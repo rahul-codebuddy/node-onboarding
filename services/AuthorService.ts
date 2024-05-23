@@ -1,4 +1,5 @@
 import Author from "../Models/Author.model";
+import redisClient from "../config/redisConfig";
 
 class AuthorService {
     async findAll() {
@@ -7,7 +8,13 @@ class AuthorService {
     }
 
     async findOne(authorId: string) {
+        // Retriving from cached:
+        const cachedData = await redisClient.get(authorId);
+        // console.log(">>>>>>>CACHED DATA<<<<<<<<<", cachedData)
+        if (cachedData) return JSON.parse(cachedData);
         const author = await Author.findById(authorId).populate("books");
+        // console.log(">>>>>>>SENDING FROM DB<<<<<<<<<");
+        redisClient.set(authorId, JSON.stringify(author));
         return author;
     }
 

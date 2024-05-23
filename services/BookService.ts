@@ -1,4 +1,5 @@
 import Book from "../Models/Book.model"
+import redisClient from "../config/redisConfig";
 import AuthorService from "./AuthorService";
 import GenreService from "./GenreService";
 
@@ -22,6 +23,7 @@ class BookService {
     async insert(data: any) {
         const { authorId, genreId, ...payload } = data;
         const author = await AuthorService.findOne(authorId);
+        console.log(">>>>", author)
         if (!author) throw new Error("Invalid author id, author doesn't exist");
 
         const book = new Book({
@@ -30,6 +32,9 @@ class BookService {
             genre: genreId
         });
         await book.save();
+
+        // Flush redis data for author:
+        redisClient.del(authorId);
 
         // Saving book to author & genre:
         author.books.push(book);
