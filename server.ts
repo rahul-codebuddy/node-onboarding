@@ -18,9 +18,11 @@ const connect = async () => {
     try {
         const mongod = await MongoMemoryServer.create();
         const URI = await mongod.getUri();
-        // const URI = process.env.MONGO_URI || "mongodb://localhost:27017/";
+        // const URI = process.env.MONGO_URI || "mongodb://localhost:27017/";   // Uncomment when using local-disk mongoDB
         mongoose.connect(URI, {
-            dbName: "node-train"
+            dbName: "node-train",
+            user: process.env.DB_USER,
+            pass: process.env.DB_PASSWORD
         });
 
         mongoose.connection.once('open', () => {

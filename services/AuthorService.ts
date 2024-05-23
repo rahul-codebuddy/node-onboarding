@@ -7,7 +7,7 @@ class AuthorService {
     }
 
     async findOne(authorId: string) {
-        const author = await Author.findById(authorId);
+        const author = await Author.findById(authorId).populate("books");
         return author;
     }
 
